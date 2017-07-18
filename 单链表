@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+typedef int DataType;
+
+typedef struct ListNode
+{
+	DataType _data;
+	struct ListNode* _next;
+}Node,*pNode,*pList;
+
+
+void Init(pList* pplist)    //初始化单链表
+{
+	assert(pplist);
+	*pplist = NULL;
+}
+pNode BuyNode(DataType x)
+{
+	pNode pnode = (pNode)malloc(sizeof(Node));
+	if (pnode == NULL)
+	{
+		perror("malloc");
+		return NULL;
+	}
+	pnode->_data = x;
+	pnode->_next = NULL;
+	return pnode;
+}
+void Push(pList* pplist,DataType x)      
+{
+	pNode NewNode = BuyNode(x);
+	if (*pplist == NULL)
+	{
+		*pplist = NewNode;
+	}
+	else
+	{
+		pNode cur = *pplist;
+		while (cur->_next)
+		{
+			cur = cur->_next;
+		}
+		cur->_next = NewNode;
+	}
+}
+pNode Find(pList plist,DataType x)
+{
+	if (plist == NULL)
+	{
+		return NULL;
+	}
+
+	else
+	{
+		pNode cur = plist;
+		while (cur)
+		{
+			if (cur->_data == x)
+			{
+				return cur;
+			}
+			cur = cur->_next;
+		}
+		return NULL;
+	}
+}
+void DeleteNotTail(pNode pos)  //删除一个非尾结点
+{
+	pNode cur = pos->_next;
+	assert(pos->_next);          //数据替换
+	pos->_data = pos->_next->_data;
+	pos->_next = pos->_next->_next;
+}
+
+void PrintfReverseNon(pList* pplist)     //非递归实现逆置打印单链表
+{
+	pList cur = *pplist;
+	pList newList = NULL;
+	assert(pplist);
+	if ((*pplist == NULL) || ((*pplist)->_next == NULL))
+	{
+		return;
+	}
+
+	while (cur)
+	{
+		pNode tmp = cur;
+		cur = cur->_next;
+		tmp->_next = newList;
+		newList = tmp;
+	}
+
+	*pplist = newList;
+
+}
+
+void PrintfReverse(pList plist)        //递归实现逆置打印单链表
+{
+	pNode cur = plist;
+	if (cur==NULL)
+	{
+		return;
+	}
+	if (cur->_next)
+	{
+		PrintfReverse(cur->_next);
+	}
+	printf(" %d\n",cur->_data);
+	
+}
+void Printf(pList plist)
+{
+	pNode cur = plist;
+	while (cur)
+	{
+		printf(" %d", cur->_data);
+		cur = cur->_next;
+	}
+	printf(" NULL\n");
+}
+
+
+
+void Test()
+{
+	pList plist;
+	Init(&plist);
+	Push(&plist, 1);
+	Push(&plist, 2);
+	Push(&plist, 3);
+	Push(&plist, 4);
+	Push(&plist, 5);
+
+	Printf(plist);
+
+	pNode ret = NULL;
+	ret = Find(plist, 4);
+
+	/*if (ret != NULL)
+	{
+		printf("找到了\n");
+	}
+	else
+	{
+		printf("没找到\n");
+	}*/
+	DeleteNotTail(ret);
+	Printf(plist);
+	PrintfReverse(plist);
+	PrintfReverseNon(&plist);
+	Printf(plist);
+}
