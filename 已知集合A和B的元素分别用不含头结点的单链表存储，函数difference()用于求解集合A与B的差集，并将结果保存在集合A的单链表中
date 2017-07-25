@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+typedef struct ListNode
+{
+	int elem;
+	struct ListNode* next;
+}Node,*pNode,*pList;
+
+void Init(pList* pplist)
+{
+	assert(pplist);
+	*pplist = NULL;
+}
+pNode BuyNode(int x)
+{
+	pNode cur = (pNode)malloc(sizeof(Node));
+	if (cur == NULL)
+	{
+		perror("malloc");
+		return NULL;
+	}
+	cur->elem = x;
+	cur->next = NULL;
+	return cur;
+}
+void Push(pList* pplist, int x)
+{
+	pNode NewNode = BuyNode(x);
+	if (*pplist == NULL)
+	{
+		*pplist = NewNode;
+	}
+	
+	else
+	{
+		pNode cur = *pplist;
+		while (cur->next)
+		{
+			cur = cur->next;
+		}
+		 cur->next = NewNode;
+	}
+}
+
+void Print(pList plist)
+{
+	pNode cur = plist;
+	while (cur)
+	{
+		printf("%d ", cur->elem);
+		cur = cur->next;
+	}
+	printf("NULL\n");
+}
+
+void difference(pNode* LA, pNode LB)
+{
+	pNode pa, pb, q;
+	pNode prev = NULL;
+	pa = *LA;               //*LA是指向指针的指针，pa指向集合的元素
+	while (pa)
+	{
+		pb = LB;            //pb指向集合的元素
+		while (pb && pa->elem != pb->elem)
+			pb = pb->next;
+		if (pb)             //pa所指向元素与pb所指的元素相等
+		{
+			if (!prev)
+			{
+				*LA = pa->next;
+			}
+			else
+			{
+				prev->next = pa->next;
+			}
+			q = pa;          //求差集,即删除pa结点
+			pa = pa->next;
+			free(q);
+		}
+		else
+		{
+			prev = pa;
+			pa = pa->next;
+		}
+	}
+}
+
+
+void Test()
+{
+	pList plist1;
+	Init(&plist1);
+	Push(&plist1, 12);
+	Push(&plist1, 2);
+	Push(&plist1, 92);
+	Push(&plist1, 1);
+	Push(&plist1, 11);
+	Print(plist1);
+
+	pList plist2;
+	Init(&plist2);
+	Push(&plist2, 12);
+	Push(&plist2, 21);
+	Push(&plist2, 92);
+	Push(&plist2, 1);
+	Print(plist2);
+	difference(&plist1, plist2);
+	Print(plist1);
+
+}
