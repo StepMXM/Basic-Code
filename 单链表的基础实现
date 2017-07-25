@@ -1,0 +1,379 @@
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+
+typedef int DataType;
+
+typedef struct ListNode
+{
+	DataType _data;
+	struct ListNode* _next;
+}Node,*pNode,*pList;
+
+void Init(pNode* pplist)
+{
+	assert(pplist);
+	*pplist = NULL;
+}
+
+pNode BuyNode(DataType x)
+{
+	pNode tmp = (pNode)malloc(sizeof(Node));
+	if (tmp == NULL)
+	{
+		perror("malloc");
+		return NULL;
+	}
+	tmp->_data = x;
+	tmp->_next = NULL;
+	return tmp;
+}
+
+void Push(pList* pplist, DataType x)
+{
+	pNode NewNode = BuyNode(x);
+	if (*pplist == NULL)
+	{
+		*pplist = NewNode;
+	}
+	else
+	{
+		pNode cur = *pplist;
+		while (cur->_next)
+		{
+			cur = cur->_next;
+		}
+		cur->_next = NewNode;
+	}
+	
+}
+
+
+void Print(pList plist)
+{
+	pNode cur = plist;
+	while (cur)
+	{
+		printf("%d ", cur->_data);
+		cur = cur->_next;
+	}
+	printf("NULL\n");
+}
+//1.从尾到头打印单链表 
+//非递归实现
+void ReverseListNon(pList* pplist)
+{
+	pNode cur = *pplist;
+	pNode NewList = NULL;
+	if ((*pplist == NULL) || ((*pplist)->_next == NULL))
+		return;
+	while (cur)
+	{
+		pNode tmp = cur;
+		cur = cur->_next;
+		tmp->_next = NewList;       //将tmp与其连接起来
+		NewList = tmp;               //相当于头插
+	}
+	*pplist = NewList;
+}
+//递归实现
+void ReverseList(pList plist)
+{
+	pNode cur = plist;
+	if (cur == NULL)
+	{
+		return;
+	}
+	if (cur->_next)
+	{
+		ReverseList(cur->_next);
+	}
+	printf("%d ", cur->_data);
+}
+
+//2.删除一个无头单链表的非尾节点
+void NottailDelete(pNode pos)
+{
+	pNode cur =pos->_next;
+	assert(pos->_next);
+	pos->_data = pos->_next->_data;
+	pos->_next = pos->_next->_next;
+}
+//3. 在无头单链表的一个节点前插入一个节点 
+void Insert(pNode* pplist,pNode pos,DataType x)
+{
+	if (*pplist == NULL)
+	{
+		Push(pplist, x);
+	}
+	pNode tmp = BuyNode(x);
+	tmp->_next = pos->_next;
+	pos->_next = tmp;           //先后插
+
+	tmp->_data = pos->_data;   //交换两个点的数据域达到前插的效果
+	pos->_data = x;
+}
+
+//4.单链表实现约瑟夫环 
+pNode JosephCycle(pList* pplist, DataType x)
+{
+	assert(pplist);
+	pNode cur = *pplist;
+
+	while (1)
+	{
+		if (cur->_next == cur)                //最终停止条件：自己指向自己
+		{
+			break;
+		}
+		pNode del = NULL;
+		for (int i = 0; i < x - 1; ++i)
+		{
+			cur = cur->_next;                //找需要删除的
+		}
+		printf("%d ", cur->_data);     
+		del = cur->_next;                
+		cur->_data = cur->_next->_data;      //删除需要删除的
+		cur->_next = cur->_next->_next;
+		free(del);
+	}
+	return cur;
+}
+//5.查找单链表的中间节点，要求只能遍历一次链表 
+pNode FindMid(pList plist)
+{
+	pNode fast = plist;
+	pNode slow = plist;
+	if (plist == NULL)
+		return NULL;
+
+	while (fast && (fast->_next))
+	{
+		fast = fast->_next->_next;
+		slow = slow->_next;
+	}
+	return slow;
+}
+//6.单链表排序（冒泡排序&快速排序）
+void BubbleSort(pList* pplist)
+{
+	pNode cur = *pplist;
+	assert(pplist);
+	if ((*pplist == NULL) || (*pplist)->_next == NULL)
+		return;
+	while (cur->_next)
+	{
+		if (cur->_data > cur->_next->_data)
+		{
+			DataType tmp = cur->_data;           //先将当前结点的数据保存起来，在进行交换
+			cur->_data = cur->_next->_data;
+			cur->_next->_data = tmp;
+		}
+		cur = cur->_next;
+	}
+}
+
+
+pNode Find(pList plist, DataType x)
+{
+	assert(plist);
+	pNode cur = plist;
+	while (cur)
+	{
+		if (cur->_data == x)
+		{
+			return cur;
+		}
+		cur = cur->_next;
+	}
+	return NULL;
+}
+// 7.合并两个有序链表,合并后依然有序 
+pList Merge(pList s1, pList s2)
+{
+	pList NewList = NULL;
+	pNode tail = NULL;
+	if (s1 == NULL)               //一个链表为空，返回另一个
+		return s2;
+	if (s2 == NULL)
+		return s1;
+	if (s1 == s2)                //两个链表相等，返回任意一个链表
+		return s1;
+	if (s1->_data >= s2->_data)  //若s1的第一个数据比s2第一个数据大，则将新链表的起点定为s2的起点
+	{
+		NewList = s2;
+		s2 = s2->_next;
+	}
+	else
+	{
+		NewList = s1;
+		s1 = s1->_next;
+	}
+
+	tail = NewList;
+	while (s1 && s2)
+	{
+		if (s1->_data >= s2->_data)        //当s1所指向的数据大于s2所指向的数据时，将较小的那个连接在新链表上
+		{
+			tail->_next = s2;
+			tail = s2;
+			s2 = s2->_next;
+		}
+		else
+		{
+			tail->_next = s1;
+			tail = s1;
+			s1 = s1->_next;
+		}
+	}
+	if (s1 == NULL)             //此时，若有一个链表走完所有，则将tail->_next连接到另一个没有走完的链表上，直到完成两个链表
+	{
+		tail->_next = s2;
+	}
+	if (s2 == NULL)
+	{
+		tail->_next = s1;
+	}
+	return NewList;
+}
+//8.查找单链表的倒数第k个节点，要求只能遍历一次链表
+pNode FindBackKNode(pList* pplist, DataType k)
+{
+	pNode fast = *pplist;
+	pNode slow = NULL;
+	for (int i = 0; i < k - 1; ++i)
+	{
+		fast = fast->_next;
+	}
+	slow = *pplist;
+	while (fast->_next)
+	{
+		fast = fast->_next;
+		slow = slow->_next;
+	}
+	return slow;
+
+}
+
+//9.删除倒数第k个结点
+void DelKNode(pList* pplist, DataType k)
+{
+
+	pNode fast = *pplist;                         //定义两个指针 让一个指针先走
+	pNode slow = *pplist;
+	assert(pplist);
+	if (*pplist == NULL)
+	{
+		return;
+	}
+	while (fast->_next != NULL)
+	{
+		--k;
+		if (k <= 0)
+		{
+			slow = slow->_next;
+		}
+		fast = fast->_next;
+	}
+	if (k <= 0)
+	{
+		pNode del = slow->_next;
+		slow->_data = slow->_next->_data;
+		slow->_next = slow->_next->_next;
+		free(del);
+	}
+}
+void Test1()
+{
+	pList plist;
+	Init(&plist);
+	Push(&plist, 1);
+	Push(&plist, 2);
+	Push(&plist, 3);
+	Push(&plist, 4);
+	/*Push(&plist,5);
+	Push(&plist, 6);*/
+
+	Print(plist);
+	//ReverseList(plist);
+	/*ReverseListNon(&plist);
+	Print(plist);*/
+	pNode ret = Find(plist, 1);
+	/*NottailDelete(ret);
+	Print(plist);*/
+	Insert(&plist, ret, 3);
+	Print(plist);
+}
+
+void Test2()
+{
+	//测试约瑟夫环
+	pList plist;
+	Init(&plist);
+	Push(&plist, 1);
+	Push(&plist, 2);
+	Push(&plist, 3);
+	Push(&plist, 4);
+	Print(plist);
+	pNode ret1 = Find(plist, 4);
+	ret1->_next = plist;
+	pNode ret2 = JosephCycle(&plist, 3);
+	printf("%d\n", ret2->_data);
+	printf("留下来的是%d号\n", ret2->_data);
+}
+
+void Test3()
+{
+	//查找中间节点，只遍历一次
+	pList plist;
+	Init(&plist);
+	Push(&plist, 1);
+	Push(&plist, 3);
+	Push(&plist, 2);
+	//Push(&plist, 4);
+	Print(plist);
+	pNode ret = FindMid(plist);
+	printf("中间节点是：%d\n", ret->_data);
+
+	BubbleSort(&plist);
+	Print(plist);
+}
+
+
+void Test4()
+{
+	pList plist1;
+	Init(&plist1);
+	Push(&plist1, 1);
+	Push(&plist1, 3);
+	Push(&plist1, 5);
+	Push(&plist1, 6);
+	Print(plist1);
+
+	pList plist2;
+	Init(&plist2);
+	Push(&plist2, 2);
+	Push(&plist2, 4);
+	Push(&plist2, 7);
+	Push(&plist2, 9);
+	Push(&plist2, 10);
+	Print(plist2);
+	pList s1 = Merge(plist1, plist2);
+	Print(s1);
+
+}
+
+void Test5()
+{
+	pList plist;
+	Init(&plist);
+	Push(&plist, 1);
+	Push(&plist, 2);
+	Push(&plist, 3);
+	Push(&plist, 4);
+	Print(plist);
+	pNode ret = FindBackKNode(&plist,3);
+	printf("查找结果是：%d\n", ret->_data);
+	DelKNode(&plist, 3);
+	Print(plist);
+}
