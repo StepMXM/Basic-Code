@@ -1,0 +1,144 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+struct BinaryTreeNode
+{
+	BinaryTreeNode<T>* _left;
+	BinaryTreeNode<T>* _right;
+	T _data;
+
+	BinaryTreeNode(const T& x)
+		:_left(NULL)
+		, _right(NULL)
+		,_data(x)
+	{}
+};
+
+template <typename T>
+class BinaryTree
+{
+	typedef BinaryTreeNode<T> Node;
+public:
+	BinaryTree()
+		:_root(NULL)
+	{}
+
+	~BinaryTree()
+	{
+		Destroy(_root);
+	}
+
+	void Destroy(Node* root)
+	{
+		if (root == NULL)
+			return;
+		Destroy(root->_left);
+		Destroy(root->_right);
+		delete root;
+	}
+
+	BinaryTree(T* a, size_t n, const T& invalid)
+	{
+		size_t index = 0;
+		_root = _CreateTree(a, n, invalid, index);
+	}
+
+	Node* Find(const T& x)                 //判断一个节点是否在一棵二叉树中
+	{
+		return _Find(_root, x);
+	}
+
+	bool HaveTree(BinaryTree<T>& s1, BinaryTree<T>& s2)
+	{
+		return _HaveTree(s1._root, s2._root);
+	}
+
+	bool DoeshaveTree2InTree1(Node* root1, Node* root2)
+	{
+		if (root2 == NULL)         //若B树为空，则空树仍为A的子结构
+			return true;
+		if (root1 == NULL)         //若A树为空，则树B不是A的子结构
+			return false;
+
+		if (root1->_data != root2->_data)
+			return false;
+		return DoeshaveTree2InTree1(root1->_left, root2->_left)      //若找到A与B树的根节点的值相同的节点，则再看相同节点的左右孩子的值是否一致
+			&& DoeshaveTree2InTree1(root1->_right, root2->_right);
+	}
+
+
+
+protected:
+	Node* _CreateTree(T* a, size_t n, const T& invalid, size_t& index)
+	{
+		Node* root = NULL;
+		if (index < n && a[index] != invalid)
+		{
+			root = new Node(a[index]);
+			root->_left = _CreateTree(a, n, invalid, ++index);
+			root->_right = _CreateTree(a, n, invalid, ++index);
+
+		}
+		return root;
+	}
+
+	Node* _Find(Node* root, const T& x)
+	{
+		if (root == NULL)
+			return NULL;
+		if (root->_data == x)
+			return root;
+		Node* ret = _Find(root->_left, x);
+		if (ret)
+			return ret;
+		return _Find(root->_right, x);
+
+	}
+	bool _HaveTree(Node* root1, Node* root2)
+	{
+		bool result = false;
+
+		if (root1 != NULL && root2 != NULL)
+		{
+			if (root1->_data == root2->_data)
+				result = DoeshaveTree2InTree1(root1, root2);
+			if (!result)
+				result = _HaveTree(root1->_left, root2);       //若A的根节点的值与B树的根节点的值不一致，则遍历A树找是否具有和其相同的节点
+			if (!result)
+				result = _HaveTree(root1->_right, root2);
+		}
+		return result;
+	}
+protected:
+	Node* _root;
+};
+
+
+void Test()
+{
+	int a[] = { 1, 2, 3, '#', '#', 4, '#', '#', 5, 6 };
+	int b[] = { 2, 3,'#','#', 4 };
+	BinaryTree<int> s(a, sizeof(a) / sizeof(a[0]), '#');
+	BinaryTree<int> s1(b, sizeof(b) / sizeof(b[0]), '#');
+	BinaryTreeNode<int>* tmp = s.Find(4);
+	if (tmp)
+	{
+		cout << "找到了：" << tmp->_data << endl;
+	}
+	else
+	{
+		cout << "没找到" << endl;
+	}
+
+	BinaryTree<int> ret;
+	cout << ret.HaveTree(s, s1) << endl;
+}
+
+#include "question.h"
+
+int main()
+{
+	Test();
+	return 0;
+}
