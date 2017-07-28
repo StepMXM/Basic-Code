@@ -1,0 +1,102 @@
+//继承
+typedef void(*FUNC)();
+struct CA     //父类 
+{
+	FUNC f;  //由于语言中结构体不能包含函数，所以只能用函数指针在外面实现
+	int _a;
+};
+
+struct CB      //子类
+{
+	CA _ca;   //在子类中定义一个父类的对象即可实现对父类的继承
+	int _b;
+};
+
+//多态 C++通过虚函数实现
+class CPPA
+{
+public:
+	virtual void f()
+	{
+		cout << "CPPA" << endl;
+	}
+protected:
+	int _a;
+};
+
+class CPPB :public CPPA
+{
+public:
+	virtual void f()
+	{
+		cout << "CPPB" << endl;
+	}
+protected:
+	int _b;
+};
+void FuncCA()     //父类的同名函数
+{
+	cout << "CA" << endl;
+}
+
+void FuncCB()     //子类的同名函数
+{
+	cout << "CB" << endl;
+}
+
+void func(CPPA* ptr)
+{
+	ptr->f();
+}
+
+int main()
+{
+	CPPA cppa;
+	CPPB cppb;
+	cppa.f();       //C++实现继承与多态
+	cppb.f();
+	func(&cppa);
+	func(&cppb);
+	return 0;
+}
+
+//C语言模拟，通过函数指针
+
+typedef void(*FUNC)();
+struct CA
+{
+	FUNC f;
+	int _a;
+};
+
+struct CB
+{
+	CA _ca;
+	int _b;
+};
+
+void FuncCA()
+{
+	cout << "CA" << endl;
+}
+
+void FuncCB()
+{
+	cout << "CB" << endl;
+}
+
+void func(CA* ptr)
+{
+	ptr->f();
+}
+
+int main()
+{
+	CA ca;  //定义一个父类对象
+	CB cb;   //定义一个子类对象
+	ca.f = FuncCA;  //CA中的函数指针指向函数  父类的对象调用父类的同名函数
+	cb._ca.f = FuncCB; //CB通过A的对象的函数指针指向的函数  子类的对象调用子类的同名函数
+	func(&ca);          //调用父类的同名函数
+	func((CA*)&cb);    //让父类指针指向子类的对象,由于类型不匹配所以要进行强转 调用子类的同名函数
+	return 0;
+}
