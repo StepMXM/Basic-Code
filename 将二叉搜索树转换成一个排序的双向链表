@@ -1,0 +1,193 @@
+question.h
+
+#include <iostream>
+using namespace std;
+template <typename T>
+struct BinaryTreeNode
+{
+	BinaryTreeNode<T>* _left;
+	BinaryTreeNode<T>* _right;
+	T _data;
+
+	BinaryTreeNode(const T& x)
+		:_left(NULL)
+		,_right(NULL)
+		, _data(x)
+	{}
+
+};
+
+
+template <typename T>
+class BinaryTree
+{
+	typedef BinaryTreeNode<T> Node;
+public:
+	BinaryTree()
+		:_root(NULL)
+	{}
+
+	~BinaryTree()
+	{
+		Destroy(_root);
+	}
+
+	void Destroy(Node* root)
+	{
+		if (root == NULL)
+			return;
+		Destroy(root->_left);
+		Destroy(root->_right);
+		delete root;
+	}
+
+	bool Insert(const T& x)        //构成搜索二叉树
+	{
+		if (_root == NULL)
+		{
+			_root = new Node(x);
+			return true;
+		}
+		Node* parent = NULL;
+		Node* cur = _root;
+		while (cur)
+		{
+			if (cur->_data > x)
+			{
+				parent = cur;
+				cur = cur->_left;
+			}
+			else if (cur->_data < x)
+			{
+				parent = cur;
+				cur = cur->_right;
+			}
+			else
+			{
+				return false;  //不能有相同的_data;
+			}
+		}
+		if (parent->_data < x)
+		{
+			parent->_right = new Node(x);
+			return true;
+		}
+		if (parent->_data > x)
+		{
+			parent->_left = new Node(x);
+			return true;
+		}
+		return false;
+	}
+
+	void InOrder()        //中序遍历二叉树
+	{
+		_InOrder(_root);
+		cout << endl;
+	}
+
+
+
+	Node* Convert()
+	{
+		return _Convert(_root);
+	}
+
+	void ConvertNode(Node* root, Node** lastNode)    
+	{
+		if (root == NULL)
+			return ;
+
+		if (root->_left)        //找到最左节点，即转换后链表的头结点
+			ConvertNode(root->_left, lastNode);
+		root->_left = *lastNode;  //调整root的左指针，指向左子树的最后一个结点
+		if (*lastNode != NULL)
+			(*lastNode)->_right = root;//调整左子树所构成链表的最后一个结点指向根节点，将其连接起来
+		*lastNode = root;              //调整指向最后一个结点的指针
+		if (root->_right != NULL)      //依次对右子树进行转换，lastNode是转换后链表的最后一个结点的指针
+			ConvertNode(root->_right, lastNode);
+	}
+
+	void Printf1()
+	{
+		Node* cur = _root;
+		while (cur->_left!=NULL)
+		{
+			cur = cur->_left;
+		}
+		while (cur)
+		{
+			cout << cur->_data << " ";
+			cur = cur->_right;
+		}
+		cout << endl;
+	}
+	void Printf2()
+	{
+		Node* cur = _root;
+		while (cur->_right!=NULL)
+		{
+			cur = cur->_right;
+		}
+		while (cur)
+		{
+			cout << cur->_data << " ";
+			cur = cur->_left;
+		}
+		cout << endl;
+	}
+
+protected:
+	void _InOrder(Node* root)
+	{
+		if (root == NULL)
+			return;
+		_InOrder(root->_left);
+		cout << root->_data << " ";
+		_InOrder(root->_right);
+	}
+
+	
+	Node* _Convert(Node* rootOfTree)
+	{
+		Node* lastNode = NULL;
+		ConvertNode(rootOfTree, &lastNode);
+
+		Node* HeadOfList = lastNode;   //lastNode指向双向链表的尾结点，需要返回头结点
+		while (HeadOfList != NULL && HeadOfList->_left != NULL)
+			HeadOfList = HeadOfList->_left;
+		return HeadOfList;
+	}
+
+protected:
+	Node* _root;
+};
+
+void Test()
+{
+
+	int arr[] = { 10, 23, 1, 4, 5, 7, 8, 10, 9 };
+	size_t size = sizeof(arr) / sizeof(arr[0]);
+	BinaryTree<int> s;
+	for (size_t i = 0; i < size; ++i)
+	{
+		s.Insert(arr[i]);
+	}
+	cout << "搜索二叉树中序遍历：" << " ";
+	s.InOrder();
+
+	BinaryTreeNode<int>* head = s.Convert();
+	cout << "双向链表从左到右序列：" << "";
+	s.Printf1();
+	cout << "双向链表从右到序列：" << "";
+	s.Printf2();
+
+}
+
+test.cpp
+#include "question.h"
+int main()
+{
+	Test();
+	return 0;
+}
